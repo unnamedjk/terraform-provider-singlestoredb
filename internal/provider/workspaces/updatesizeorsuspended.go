@@ -57,7 +57,11 @@ func scale(ctx context.Context, c management.ClientWithResponsesInterface, plan 
 
 func resume(ctx context.Context, c management.ClientWithResponsesInterface, plan workspaceResourceModel) (workspaceResourceModel, *util.SummaryWithDetailError) {
 	id := uuid.MustParse(plan.ID.ValueString())
-	workspaceResumeResponse, err := c.PostV1WorkspacesWorkspaceIDResumeWithResponse(ctx, id)
+	workspaceResume := management.WorkspaceResume{
+		DisableAutoSuspend: nil, // or &true / &false based on your requirement
+	}
+
+	workspaceResumeResponse, err := c.PostV1WorkspacesWorkspaceIDResumeWithResponse(ctx, id, workspaceResume)
 	if serr := util.StatusOK(workspaceResumeResponse, err); serr != nil {
 		return workspaceResourceModel{}, serr
 	}
