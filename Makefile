@@ -8,10 +8,10 @@ deps:
 	go mod tidy
 
 build:
-	go build -o ${BINARY}
+	go build -buildvcs=false -o ${BINARY}
 
 install: deps build
-	go install .
+	go install -buildvcs=false . 
 
 unit: install nocache # Unit tests depend on the binary.
 	go test -race -v -timeout=5m -short ./... -coverprofile=${COVERAGE} -covermode=atomic

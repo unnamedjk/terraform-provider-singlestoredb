@@ -42,6 +42,7 @@ type workspaceResourceModel struct {
 	Suspended        types.Bool   `tfsdk:"suspended"`
 	CreatedAt        types.String `tfsdk:"created_at"`
 	Endpoint         types.String `tfsdk:"endpoint"`
+	EnableKai        types.Bool   `tfsdk:"enable_kai"`
 }
 
 // NewResource is a helper function to simplify the provider implementation.
@@ -97,6 +98,11 @@ func (r *workspaceResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				Computed:            true,
 				MarkdownDescription: "The endpoint used to connect to the workspace.",
 			},
+			"enable_kai": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				MarkdownDescription: "Whether to create a SingleStore Kai-enabled workspace.",
+			},
 		},
 	}
 }
@@ -119,11 +125,13 @@ func (r *workspaceResource) Create(ctx context.Context, req resource.CreateReque
 
 		return
 	}
+	enableKai := plan.EnableKai.ValueBool()
 
 	workspaceCreateResponse, err := r.PostV1WorkspacesWithResponse(ctx, management.PostV1WorkspacesJSONRequestBody{
 		Name:             plan.Name.ValueString(),
 		Size:             util.MaybeString(plan.Size),
 		WorkspaceGroupID: uuid.MustParse(plan.WorkspaceGroupID.String()),
+		EnableKai:        &enableKai,
 	})
 	if serr := util.StatusOK(workspaceCreateResponse, err); serr != nil {
 		resp.Diagnostics.AddError(
